@@ -4,6 +4,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -99,7 +102,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 translatedto.setText("");
                 if(sourceEdt.getText().toString().isEmpty()){
-                    Toast.makeText(MainActivity.this, "Please Enter Your Language", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "Empty Text", Toast.LENGTH_SHORT).show();
 
                 } else if(fromLanguageCode==0){
                     Toast.makeText(MainActivity.this, "Please Enter Source Language", Toast.LENGTH_SHORT).show();
@@ -148,7 +151,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void translateText(int fromLanguageCode, int toLanguagesCode, String source)
     {
-        translatedto.setText("Downloading....");
+        translatedto.setText("Processing.......");
         FirebaseTranslatorOptions options = new FirebaseTranslatorOptions.Builder()
                 .setSourceLanguage(fromLanguageCode)
                 .setTargetLanguage(toLanguagesCode)
@@ -202,11 +205,37 @@ public class MainActivity extends AppCompatActivity {
          @Override
          public void onInit(int status) {
              if(status !=TextToSpeech.ERROR){
-                 tts.setLanguage(Locale.UK);
+                 tts.setLanguage(Locale.getDefault());
              }
              else{
                  Toast.makeText(MainActivity.this,"Empty Content",Toast.LENGTH_SHORT).show();
              }
+         }
+     });
+
+     btncopy.setOnClickListener(new View.OnClickListener() {
+         @Override
+         public void onClick(View view) {
+             ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+             ClipData clip = ClipData.newPlainText("text",translatedto.getText().toString());
+             clipboard.setPrimaryClip(clip);
+
+             Toast.makeText(MainActivity.this,"Copied", Toast.LENGTH_SHORT).show();
+
+         }
+     });
+
+     btnshare.setOnClickListener(new View.OnClickListener() {
+         @Override
+         public void onClick(View view) {
+             Intent intent = new Intent();
+             intent.setAction(intent.ACTION_SEND);
+             intent.putExtra(intent.EXTRA_TEXT,translatedto.getText().toString());
+             intent.setType("text/plain");
+             intent=Intent.createChooser(intent,"Share Using");
+             startActivity(intent);
+
+
          }
      });
 
